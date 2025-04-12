@@ -12,7 +12,7 @@ class ShopItem extends HTMLElement {
 
   /**
    * Set the shop item data for this component
-   * @param {Object} item - The shop item data to display
+   * @param {object} item - The shop item data to display
    */
   set item(item) {
     this._item = item;
@@ -21,7 +21,7 @@ class ShopItem extends HTMLElement {
 
   /**
    * Get the shop item data for this component
-   * @returns {Object} The shop item data
+   * @returns {object} The shop item data
    */
   get item() {
     return this._item;
@@ -54,10 +54,15 @@ class ShopItem extends HTMLElement {
     const canPurchase = this._userPoints >= this._item.points;
     const disabledClass = canPurchase ? '' : 'disabled';
 
+    if (!this.shadowRoot) return;
+
     this.shadowRoot.innerHTML = `
       <style>
         :host {
           display: block;
+          user-select: none;
+          -webkit-user-select: none;
+          -webkit-touch-callout: none;
         }
         
         .shop-item {
@@ -66,6 +71,9 @@ class ShopItem extends HTMLElement {
           box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
           padding: 20px;
           transition: transform 0.3s ease, box-shadow 0.3s ease;
+          user-select: none;
+          -webkit-user-select: none;
+          -webkit-touch-callout: none;
         }
         
         .shop-item:not(.disabled):hover {
@@ -130,12 +138,26 @@ class ShopItem extends HTMLElement {
     `;
 
     // Add event listener for the purchase button
-    if (canPurchase) {
-      this.shadowRoot.querySelector('.purchase-button').addEventListener('click', () => {
-        this.dispatchEvent(new CustomEvent('purchase', {
-          detail: { itemId: this._item.id, cost: this._item.points }
-        }));
-      });
+    if (canPurchase && this.shadowRoot) {
+      const purchaseButton = this.shadowRoot.querySelector('.purchase-button');
+      if (purchaseButton) {
+        purchaseButton.addEventListener('click', () => {
+          this.dispatchEvent(
+            new CustomEvent('purchase', {
+              detail: { itemId: this._item.id, cost: this._item.points },
+            })
+          );
+        });
+      }
+
+      // Prevent context menu on the shop item
+      const shopItem = this.shadowRoot.querySelector('.shop-item');
+      if (shopItem) {
+        shopItem.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          return false;
+        });
+      }
     }
   }
 }
@@ -143,4 +165,4 @@ class ShopItem extends HTMLElement {
 // Register the custom element
 customElements.define('shop-item', ShopItem);
 
-export default ShopItem; 
+export default ShopItem;

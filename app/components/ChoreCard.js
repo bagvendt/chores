@@ -99,6 +99,9 @@ class ChoreCard extends HTMLElement {
       <style>
         :host {
           display: block;
+          user-select: none;
+          -webkit-user-select: none;
+          -webkit-touch-callout: none;
         }
         
         .chore-card {
@@ -113,6 +116,9 @@ class ChoreCard extends HTMLElement {
           height: 100%;
           padding: 0;
           aspect-ratio: 1 / 1;
+          user-select: none;
+          -webkit-user-select: none;
+          -webkit-touch-callout: none;
         }
         
         .chore-card:hover {
@@ -217,6 +223,12 @@ class ChoreCard extends HTMLElement {
       card.addEventListener('mouseleave', this.cancelPress.bind(this));
       card.addEventListener('touchend', this.endPress.bind(this));
       card.addEventListener('touchcancel', this.cancelPress.bind(this));
+
+      // Prevent context menu from appearing on long press
+      card.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        return false;
+      });
 
       // Use a more type-safe approach to handle touch move events
       card.addEventListener(
@@ -335,18 +347,18 @@ class ChoreCard extends HTMLElement {
   }
 
   /**
-   * Complete the long press and toggle the completion status
+   * Complete the long press action
    */
   completeLongPress() {
     this.cancelPress();
 
     if (!this._chore) return;
 
-    // Toggle completion state
-    this._chore.completed = !this._chore.completed;
-
     const shadowRoot = this.shadowRoot;
     if (!shadowRoot) return;
+
+    // Toggle completion state
+    this._chore.completed = !this._chore.completed;
 
     // Update the appearance
     const card = shadowRoot.querySelector('.chore-card');
@@ -354,12 +366,15 @@ class ChoreCard extends HTMLElement {
 
     if (!card || !statusIndicator) return;
 
+    // Prevent interactions during animation
+    this.animationActive = true;
+
     if (this._chore.completed) {
       card.classList.add('completed');
       statusIndicator.textContent = '✅';
 
       // Add completion animation
-      statusIndicator.classList.add('completed-animation');
+      card.classList.add('completed-animation');
 
       // Add stronger vibration feedback for completion
       if (navigator.vibrate) {
@@ -375,21 +390,32 @@ class ChoreCard extends HTMLElement {
       }
     }
 
-    // Prevent interactions during animation
-    this.animationActive = true;
+    // Remove the animation class after it completes
     setTimeout(() => {
-      if (statusIndicator) {
-        statusIndicator.classList.remove('completed-animation');
+      if (card) {
+        card.classList.remove('completed-animation');
       }
       this.animationActive = false;
     }, 500);
 
-    // Dispatch an event to notify parent components
-    this.dispatchEvent(
-      new CustomEvent('completion-changed', {
-        detail: { choreId: this._chore.id, completed: this._chore.completed },
-      })
-    );
+    // Dispatch a structured CustomEvent with the completion status
+    this.dispatchCompletionChanged(this._chore.completed);
+  }
+
+  /**
+   * Dispatch a custom event for the completion status change
+   * @param {boolean} completed - The new completion status
+   */
+  dispatchCompletionChanged(completed) {
+    // Create a proper CustomEvent with detail object
+    const event = new CustomEvent('completion-changed', {
+      bubbles: true,
+      composed: true,
+      detail: { completed, choreId: this._chore ? this._chore.id : null },
+    });
+
+    // Dispatch the event from this element
+    this.dispatchEvent(event);
   }
 }
 

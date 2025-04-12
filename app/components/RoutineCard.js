@@ -1,6 +1,6 @@
 /**
  * RoutineCard web component
- * Displays a routine with summary information about its chores
+ * Displays a routine as a full-image card (child-friendly, no text)
  */
 class RoutineCard extends HTMLElement {
   constructor() {
@@ -11,7 +11,7 @@ class RoutineCard extends HTMLElement {
 
   /**
    * Set the routine data for this component
-   * @param {Object} routine - The routine data to display
+   * @param {object} routine - The routine data to display
    */
   set routine(routine) {
     this._routine = routine;
@@ -20,7 +20,7 @@ class RoutineCard extends HTMLElement {
 
   /**
    * Get the routine data for this component
-   * @returns {Object} The routine data
+   * @returns {object} The routine data
    */
   get routine() {
     return this._routine;
@@ -33,35 +33,25 @@ class RoutineCard extends HTMLElement {
     if (this._routine) {
       this.render();
     }
+
+    // Listen for attribute changes
+    this.attributeChangedCallback();
   }
 
   /**
-   * Get the total points for this routine
-   * @returns {number} Total points
+   * Define which attributes to observe
    */
-  getTotalPoints() {
-    if (!this._routine || !this._routine.chores) return 0;
-    return this._routine.chores.reduce((total, chore) => total + chore.points, 0);
+  static get observedAttributes() {
+    return ['today'];
   }
 
   /**
-   * Get the total earned points for this routine
-   * @returns {number} Total earned points
+   * Handle attribute changes
    */
-  getEarnedPoints() {
-    if (!this._routine || !this._routine.chores) return 0;
-    return this._routine.chores
-      .filter(chore => chore.completed)
-      .reduce((total, chore) => total + chore.points, 0);
-  }
-
-  /**
-   * Get the total estimated time for this routine
-   * @returns {number} Total time in minutes
-   */
-  getTotalTime() {
-    if (!this._routine || !this._routine.chores) return 0;
-    return this._routine.chores.reduce((total, chore) => total + chore.estimatedTime, 0);
+  attributeChangedCallback() {
+    if (this._routine) {
+      this.render();
+    }
   }
 
   /**
@@ -70,8 +60,8 @@ class RoutineCard extends HTMLElement {
    */
   getCompletionPercentage() {
     if (!this._routine || !this._routine.chores || this._routine.chores.length === 0) return 0;
-    
-    const completedChores = this._routine.chores.filter(chore => chore.completed).length;
+
+    const completedChores = this._routine.chores.filter((chore) => chore.completed).length;
     return Math.round((completedChores / this._routine.chores.length) * 100);
   }
 
@@ -81,134 +71,106 @@ class RoutineCard extends HTMLElement {
   render() {
     if (!this._routine) return;
 
-    const totalPoints = this.getTotalPoints();
-    const earnedPoints = this.getEarnedPoints();
-    const totalTime = this.getTotalTime();
+    // Get whether this is today's routine
+    const isToday = this.hasAttribute('today');
     const completionPercentage = this.getCompletionPercentage();
+
+    // Ensure we have an image URL with fallback to a placeholder
+    const placeholderImage = `data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect fill='%23f2f2f2' width='100' height='100'/%3E%3Cpath fill='%23aaaaaa' d='M30 50L50 30L70 50L50 70Z'/%3E%3C/svg%3E`;
+    const imageUrl = this._routine.imageUrl || placeholderImage;
+
+    if (!this.shadowRoot) return;
 
     this.shadowRoot.innerHTML = `
       <style>
         :host {
           display: block;
+          width: 100%;
+          height: 100%;
+          user-select: none;
+          -webkit-user-select: none;
+          -webkit-touch-callout: none;
         }
         
         .routine-card {
-          background-color: #fff;
-          border-radius: 10px;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-          padding: 20px;
+          position: relative;
+          width: 100%;
+          height: 100%;
+          border-radius: 15px;
+          overflow: hidden;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
           transition: transform 0.3s ease, box-shadow 0.3s ease;
           cursor: pointer;
+          aspect-ratio: 1 / 1;
+          display: flex;
+          flex-direction: column;
+          user-select: none;
+          -webkit-user-select: none;
+          -webkit-touch-callout: none;
         }
         
         .routine-card:hover {
           transform: translateY(-5px);
-          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
         }
         
-        .routine-title {
-          font-size: 1.4rem;
-          margin: 0 0 15px 0;
-          color: #333;
+        .routine-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
         }
         
-        .routine-details {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 10px;
-          margin-bottom: 15px;
-        }
-        
-        .detail-item {
-          display: flex;
-          flex-direction: column;
-        }
-        
-        .detail-label {
-          font-size: 0.8rem;
-          color: #666;
-        }
-        
-        .detail-value {
-          font-size: 1.1rem;
-          font-weight: bold;
-        }
-        
-        .points-value {
-          color: #4CAF50;
-        }
-        
-        .progress-container {
-          margin-top: 15px;
-        }
-        
-        .progress-label {
-          display: flex;
-          justify-content: space-between;
-          margin-bottom: 5px;
-          font-size: 0.9rem;
+        .today-indicator {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          width: 30px;
+          height: 30px;
+          background-color: #FF5722;
+          border-radius: 50%;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
         }
         
         .progress-bar {
-          height: 10px;
-          background-color: #e0e0e0;
-          border-radius: 5px;
-          overflow: hidden;
-        }
-        
-        .progress-fill {
-          height: 100%;
-          background-color: #4CAF50;
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          height: 8px;
+          background-color: rgba(76, 175, 80, 0.7);
           width: ${completionPercentage}%;
-          transition: width 0.3s ease;
         }
       </style>
       
       <div class="routine-card">
-        <h2 class="routine-title">${this._routine.title}</h2>
-        
-        <div class="routine-details">
-          <div class="detail-item">
-            <span class="detail-label">Pligter</span>
-            <span class="detail-value">${this._routine.chores.length}</span>
-          </div>
-          
-          <div class="detail-item">
-            <span class="detail-label">Tid</span>
-            <span class="detail-value">${totalTime} min</span>
-          </div>
-          
-          <div class="detail-item">
-            <span class="detail-label">Samlede Point</span>
-            <span class="detail-value points-value">${totalPoints}</span>
-          </div>
-          
-          <div class="detail-item">
-            <span class="detail-label">Optjente Point</span>
-            <span class="detail-value points-value">${earnedPoints}</span>
-          </div>
-        </div>
-        
-        <div class="progress-container">
-          <div class="progress-label">
-            <span>Fremskridt</span>
-            <span>${completionPercentage}%</span>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill"></div>
-          </div>
-        </div>
+        <img class="routine-image" src="${imageUrl}" alt="${this._routine.title}">
+        ${isToday ? '<div class="today-indicator"></div>' : ''}
+        ${completionPercentage > 0 ? '<div class="progress-bar"></div>' : ''}
       </div>
     `;
 
-    // Add click event listener
-    this.shadowRoot.querySelector('.routine-card').addEventListener('click', () => {
-      this.dispatchEvent(new Event('click'));
-    });
+    const cardElement = this.shadowRoot.querySelector('.routine-card');
+    if (cardElement) {
+      cardElement.addEventListener('click', () => {
+        this.dispatchEvent(
+          new CustomEvent('routine-click', {
+            detail: { routine: this._routine },
+            bubbles: true,
+            composed: true,
+          })
+        );
+      });
+
+      // Prevent context menu from appearing on long press
+      cardElement.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        return false;
+      });
+    }
   }
 }
 
-// Register the custom element
+// Define the element
 customElements.define('routine-card', RoutineCard);
 
-export default RoutineCard; 
+export default RoutineCard;

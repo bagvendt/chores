@@ -61,7 +61,13 @@ h1, h2, h3 {
 
 /* Routines and Chores Styling */
 .routines-container,
-.routines-list,
+.routines-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--spacing);
+  margin: 1rem 0;
+}
+
 .chores-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -69,7 +75,7 @@ h1, h2, h3 {
   margin: 1rem 0;
 }
 
-.routine-card,
+/* Only apply these to chore cards since routine cards have their own styling */
 .chore-card {
   background-color: var(--card-background);
   border-radius: var(--border-radius);
@@ -79,7 +85,6 @@ h1, h2, h3 {
   cursor: pointer;
 }
 
-.routine-card:hover,
 .chore-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
@@ -145,10 +150,20 @@ button:hover {
   animation: fadeIn 0.5s ease-in-out;
 }
 
+/* Make routine cards display as square image containers */
+routine-card {
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  display: block;
+}
+
 /* Responsive Adjustments for iPad landscape */
 @media (min-width: 1024px) {
   .routines-container,
-  .routines-list,
+  .routines-list {
+    grid-template-columns: repeat(5, 1fr);
+  }
+  
   .chores-container {
     grid-template-columns: repeat(4, 1fr);
   }
