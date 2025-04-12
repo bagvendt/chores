@@ -1,0 +1,18 @@
+{
+  "name": "chores-tracker",
+  "version": "1.0.0",
+  "description": "A web application for children to track chores",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "chores",
+    "children",
+    "routines",
+    "web-components"
+  ],
+  "author": "",
+  "license": "MIT"
+} 

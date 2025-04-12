@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pligter Tracker</title>
+    <link rel="stylesheet" href="app/styles/main.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>Pligter Tracker</h1>
+        </header>
+        
+        <main>
+            <section id="main-view" class="view active">
+                <h2>Velkommen til Pligter Tracker!</h2>
+                <div class="routines-container">
+                    <!-- Routines will be dynamically loaded here -->
+                </div>
+                <div class="shop-container">
+                    <h3>Butik</h3>
+                    <!-- Shop items will be dynamically loaded here -->
+                </div>
+            </section>
+
+            <section id="routine-list-view" class="view">
+                <h2>Dine Rutiner</h2>
+                <div class="routines-list">
+                    <!-- Routine list will be dynamically loaded here -->
+                </div>
+                <button id="back-to-main" class="nav-button">Tilbage</button>
+            </section>
+
+            <section id="routine-detail-view" class="view">
+                <h2 id="routine-title">Rutine Detaljer</h2>
+                <div class="chores-container">
+                    <!-- Chores will be dynamically loaded here -->
+                </div>
+                <button id="back-to-list" class="nav-button">Tilbage</button>
+            </section>
+        </main>
+    </div>
+
+    <!-- Main Application Script -->
+    <script type="module" src="app/main.js"></script>
+</body>
+</html> 

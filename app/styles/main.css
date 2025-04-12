@@ -1,0 +1,170 @@
+:root {
+  --primary-color: #4CAF50;
+  --secondary-color: #2196F3;
+  --background-color: #f9f9f9;
+  --text-color: #333;
+  --card-background: #fff;
+  --shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --border-radius: 10px;
+  --spacing: 20px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  line-height: 1.6;
+  /* Target iPad in landscape mode */
+  min-height: 100vh;
+  padding: 20px;
+}
+
+#app {
+  max-width: 1024px;
+  margin: 0 auto;
+  background-color: var(--card-background);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  min-height: 90vh;
+}
+
+header {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 1rem var(--spacing);
+  text-align: center;
+}
+
+main {
+  padding: var(--spacing);
+}
+
+h1, h2, h3 {
+  margin-bottom: 1rem;
+}
+
+/* View Management */
+.view {
+  display: none;
+}
+
+.view.active {
+  display: block;
+}
+
+/* Routines and Chores Styling */
+.routines-container,
+.routines-list,
+.chores-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: var(--spacing);
+  margin: 1rem 0;
+}
+
+.routine-card,
+.chore-card {
+  background-color: var(--card-background);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  padding: var(--spacing);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.routine-card:hover,
+.chore-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.chore-card img {
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 10px;
+  border-radius: 5px;
+}
+
+.shop-container {
+  margin-top: 2rem;
+  padding: var(--spacing);
+  background-color: rgba(33, 150, 243, 0.1);
+  border-radius: var(--border-radius);
+}
+
+/* Buttons */
+button {
+  background-color: var(--secondary-color);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0b7dda;
+}
+
+.nav-button {
+  margin-top: 1rem;
+}
+
+/* Completed Chore Styling */
+.chore-card.completed {
+  opacity: 0.7;
+  background-color: rgba(76, 175, 80, 0.1);
+}
+
+.chore-card .completion-status {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.chore-card .completion-status span {
+  margin-left: 5px;
+}
+
+/* Transition animations for view changes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.view.active {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Responsive Adjustments for iPad landscape */
+@media (min-width: 1024px) {
+  .routines-container,
+  .routines-list,
+  .chores-container {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 1023px) {
+  .routines-container,
+  .routines-list,
+  .chores-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Points display */
+.points {
+  font-weight: bold;
+  color: var(--primary-color);
+  margin-top: 5px;
+} 

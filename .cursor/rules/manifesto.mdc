@@ -1,0 +1,93 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Project manifesto
+
+We are writing a web based application for children for tracking chores.
+
+One child may have one routines to be solved.
+
+Examples of routines could be:
+
+- Morning
+- Before dinner
+- After dinner
+- Bedtime
+
+One routine may consist of multiple chores. 
+
+The morning routine could consist of the following chores:
+
+- Brush teeth
+- Get dressed
+- Back lunch box
+- Eat breakfast
+- Get out of the door
+
+Each routine will have the following attributes:
+- Title
+- Deadline (Time of day) ex. 7:50
+- Image URL
+
+
+Each chore will have the following attributes:
+- Estimated time to complete
+- image url to piktogram
+- Title
+- Points awared on completion
+
+
+
+-----------
+
+## Technical agreement
+
+- We use modern ES6 JS with and use JSDoc for adding types.
+- We want to use web components
+- We want to use the web transition api.
+- The target device is an ipad in landscape mode running ios safari
+- We are not using a JS frontend framework.
+- We like simplicity over complexity
+- Explicit beats implicit. 
+- You can repeat yourself.
+- DRY is dead
+- SOLID is dead!
+
+
+## Overall architecture
+
+
+- The app is multi user. Meaning a family of children can work on the same routine.
+
+There are the following views:
+
+- Main view where we can see the shop. And start different routines. 
+- Routine list view
+- Routine detail view.
+
+- We are offline first. And store data in localstorage.
+
+
+### Routine detail view. 
+
+A routine can be in three states
+
+- Initial (not started)
+- Ongoing
+- Final
+
+When I go to a routine, if it is not started i am prompted to start it. 
+The routine is then in the ONGOING mode. 
+
+I write the start datetime to localstorge
+I calculate the timedelta from now until the deadline 
+
+In the view we display the chores in the routine and their completion state per child.
+
+A chore can be completed or not completed per child.
+
+When all chores are done, or the deadline has occured the Routine transitions to the FINAL state
+
+
