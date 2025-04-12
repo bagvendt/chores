@@ -1,0 +1,39 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
+  },
+  "extends": ["eslint:recommended"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "plugins": ["@typescript-eslint"],
+  "rules": {
+    "no-unused-vars": "warn",
+    "no-console": "warn",
+    "valid-jsdoc": [
+      "warn",
+      {
+        "requireReturn": false,
+        "requireReturnType": true,
+        "requireParamType": true,
+        "preferType": {
+          "String": "string",
+          "Number": "number",
+          "Boolean": "boolean",
+          "Array": "array",
+          "Object": "object",
+          "Function": "function"
+        }
+      }
+    ]
+  },
+  "settings": {
+    "jsdoc": {
+      "mode": "typescript"
+    }
+  }
+} 

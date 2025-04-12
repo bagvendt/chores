@@ -24,6 +24,41 @@ A web-based application for children to track their chores and earn points for c
 2. Open `index.html` in your browser
 3. Start tracking chores!
 
+## Development
+
+This project follows these principles:
+- Simplicity over complexity
+- Explicit beats implicit
+- No DRY (Don't Repeat Yourself) constraint
+- No SOLID constraint
+
+### Code Quality Tools
+
+The project includes the following code quality tools:
+
+- **ESLint**: Checks for code quality and potential issues
+- **TypeScript**: Validates JSDoc type annotations without requiring TypeScript
+- **Prettier**: Enforces consistent code formatting
+- **Husky**: Runs pre-commit hooks to ensure code quality before commits
+
+### Running the Tools
+
+```bash
+# Install dependencies
+npm install
+
+# Run ESLint
+npm run lint
+
+# Format code with Prettier
+npm run format
+
+# Check types using TypeScript (based on JSDoc)
+npm run typecheck
+```
+
+All tools are configured to run automatically on pre-commit, ensuring code quality.
+
 ## File Structure
 
 ```
@@ -39,14 +74,6 @@ A web-based application for children to track their chores and earn points for c
 │       └── main.css        # Main application styles
 └── img/                    # Images for chores and shop items
 ```
-
-## Development
-
-This project follows these principles:
-- Simplicity over complexity
-- Explicit beats implicit
-- No DRY (Don't Repeat Yourself) constraint
-- No SOLID constraint
 
 ## License
 
