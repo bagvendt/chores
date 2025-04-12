@@ -122,6 +122,7 @@ class ChoreCard extends HTMLElement {
         .chore-card.pressing {
           transform: scale(0.95);
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          animation: crazyShake 0.5s infinite;
         }
         
         .chore-image {
@@ -156,8 +157,34 @@ class ChoreCard extends HTMLElement {
           100% { transform: scale(1); }
         }
         
+        @keyframes crazyShake {
+          0% { transform: scale(0.95) rotate(0deg); }
+          10% { transform: scale(0.95) rotate(-10deg) translate(-4px, -2px); }
+          20% { transform: scale(0.95) rotate(8deg) translate(7px, 3px); }
+          30% { transform: scale(0.92) rotate(-12deg) translate(-7px, 0); }
+          40% { transform: scale(0.98) rotate(9deg) translate(4px, -3px); }
+          50% { transform: scale(0.94) rotate(-8deg) translate(-2px, 2px); }
+          60% { transform: scale(0.97) rotate(10deg) translate(7px, 0); }
+          70% { transform: scale(0.92) rotate(-6deg) translate(-7px, 3px); }
+          80% { transform: scale(0.97) rotate(5deg) translate(2px, -3px); }
+          90% { transform: scale(0.94) rotate(-7deg) translate(-3px, 0); }
+          100% { transform: scale(0.95) rotate(0deg); }
+        }
+        
         .completed-animation {
           animation: completedAnimation 0.5s ease;
+        }
+        
+        .progress-indicator.active {
+          background: linear-gradient(90deg, 
+            #FF9900, #FF5722, #E91E63, #9C27B0, #3F51B5, #2196F3, #00BCD4, #009688, #4CAF50, #8BC34A);
+          background-size: 1000% 100%;
+          animation: rainbowProgress 2s linear infinite;
+        }
+        
+        @keyframes rainbowProgress {
+          0% { background-position: 0% 50%; }
+          100% { background-position: 100% 50%; }
         }
       </style>
       
@@ -171,14 +198,27 @@ class ChoreCard extends HTMLElement {
     const card = this.shadowRoot.querySelector('.chore-card');
 
     // Add touch/mouse events for long press
-    card.addEventListener('mousedown', this.startPress.bind(this));
-    card.addEventListener('touchstart', this.startPress.bind(this), { passive: true });
+    if (card) {
+      card.addEventListener('mousedown', this.startPress.bind(this));
+      card.addEventListener('touchstart', this.startPress.bind(this), { passive: true });
 
-    card.addEventListener('mouseup', this.endPress.bind(this));
-    card.addEventListener('mouseleave', this.cancelPress.bind(this));
-    card.addEventListener('touchend', this.endPress.bind(this));
-    card.addEventListener('touchcancel', this.cancelPress.bind(this));
-    card.addEventListener('touchmove', this.checkTouchMove.bind(this), { passive: true });
+      card.addEventListener('mouseup', this.endPress.bind(this));
+      card.addEventListener('mouseleave', this.cancelPress.bind(this));
+      card.addEventListener('touchend', this.endPress.bind(this));
+      card.addEventListener('touchcancel', this.cancelPress.bind(this));
+
+      // Use a more type-safe approach to handle touch move events
+      card.addEventListener(
+        'touchmove',
+        (e) => {
+          // Cast the event to make TypeScript happy
+          if (e instanceof TouchEvent) {
+            this.checkTouchMove(e);
+          }
+        },
+        { passive: true }
+      );
+    }
   }
 
   /**
@@ -188,16 +228,25 @@ class ChoreCard extends HTMLElement {
   startPress(e) {
     if (this.animationActive) return;
 
-    const progressIndicator = this.shadowRoot.querySelector('.progress-indicator');
-    const card = this.shadowRoot.querySelector('.chore-card');
+    const shadowRoot = this.shadowRoot;
+    if (!shadowRoot) return;
+
+    const progressIndicator = shadowRoot.querySelector('.progress-indicator');
+    const card = shadowRoot.querySelector('.chore-card');
+
+    if (!card) return;
 
     // Add pressing class for visual feedback
     card.classList.add('pressing');
 
+    if (progressIndicator instanceof HTMLElement) {
+      progressIndicator.classList.add('active');
+    }
+
     this.pressStarted = true;
 
     // Store touch position if it's a touch event
-    if (e.type === 'touchstart' && e.touches && e.touches[0]) {
+    if (e.type === 'touchstart' && 'touches' in e && e.touches[0]) {
       this.touchStartY = e.touches[0].clientY;
     }
 
@@ -205,7 +254,7 @@ class ChoreCard extends HTMLElement {
     let progress = 0;
     this.pressTimer = setInterval(() => {
       progress += 100 / (this.longPressDuration / 100); // Increment by percentage per 100ms
-      if (progressIndicator) {
+      if (progressIndicator instanceof HTMLElement) {
         progressIndicator.style.width = `${progress}%`;
       }
 
@@ -237,11 +286,15 @@ class ChoreCard extends HTMLElement {
       this.pressTimer = null;
     }
 
-    const progressIndicator = this.shadowRoot.querySelector('.progress-indicator');
-    const card = this.shadowRoot.querySelector('.chore-card');
+    const shadowRoot = this.shadowRoot;
+    if (!shadowRoot) return;
 
-    if (progressIndicator) {
+    const progressIndicator = shadowRoot.querySelector('.progress-indicator');
+    const card = shadowRoot.querySelector('.chore-card');
+
+    if (progressIndicator instanceof HTMLElement) {
       progressIndicator.style.width = '0%';
+      progressIndicator.classList.remove('active');
     }
 
     if (card) {
@@ -278,9 +331,12 @@ class ChoreCard extends HTMLElement {
     // Toggle completion state
     this._chore.completed = !this._chore.completed;
 
+    const shadowRoot = this.shadowRoot;
+    if (!shadowRoot) return;
+
     // Update the appearance
-    const card = this.shadowRoot.querySelector('.chore-card');
-    const statusIndicator = this.shadowRoot.querySelector('.status-indicator');
+    const card = shadowRoot.querySelector('.chore-card');
+    const statusIndicator = shadowRoot.querySelector('.status-indicator');
 
     if (!card || !statusIndicator) return;
 
