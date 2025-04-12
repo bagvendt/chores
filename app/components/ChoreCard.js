@@ -92,6 +92,9 @@ class ChoreCard extends HTMLElement {
     const completedClass = this._chore.completed ? 'completed' : '';
     const statusEmoji = this._chore.completed ? '✅' : '❌';
 
+    // Handle potentially null shadowRoot with a check
+    if (!this.shadowRoot) return;
+
     this.shadowRoot.innerHTML = `
       <style>
         :host {
@@ -102,12 +105,14 @@ class ChoreCard extends HTMLElement {
           background-color: #fff;
           border-radius: 10px;
           box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-          padding: 20px;
           transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
           cursor: pointer;
-          text-align: center;
           position: relative;
           overflow: hidden;
+          width: 100%;
+          height: 100%;
+          padding: 0;
+          aspect-ratio: 1 / 1;
         }
         
         .chore-card:hover {
@@ -127,28 +132,34 @@ class ChoreCard extends HTMLElement {
         
         .chore-image {
           width: 100%;
-          height: auto;
-          max-height: 150px;
-          object-fit: contain;
-          border-radius: 5px;
+          height: 100%;
+          object-fit: cover;
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
         }
         
         .status-indicator {
           position: absolute;
           top: 10px;
           right: 10px;
-          font-size: 1.5rem;
+          font-size: 2rem;
           z-index: 10;
+          text-shadow: 0 0 5px white, 0 0 5px white;
+          filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
         }
         
         .progress-indicator {
           position: absolute;
           bottom: 0;
           left: 0;
-          height: 5px;
+          height: 8px;
           background-color: #4CAF50;
           width: 0%;
           transition: width 0.1s linear;
+          z-index: 10;
         }
         
         @keyframes completedAnimation {
@@ -189,8 +200,8 @@ class ChoreCard extends HTMLElement {
       </style>
       
       <div class="chore-card ${completedClass}">
-        <div class="status-indicator">${statusEmoji}</div>
         <img class="chore-image" src="${this._chore.imageUrl}" alt="${this._chore.title}">
+        <div class="status-indicator">${statusEmoji}</div>
         <div class="progress-indicator"></div>
       </div>
     `;
@@ -246,8 +257,11 @@ class ChoreCard extends HTMLElement {
     this.pressStarted = true;
 
     // Store touch position if it's a touch event
-    if (e.type === 'touchstart' && 'touches' in e && e.touches[0]) {
-      this.touchStartY = e.touches[0].clientY;
+    if (e.type === 'touchstart' && 'touches' in e) {
+      // Use instanceof check instead of type assertion
+      if (e instanceof TouchEvent && e.touches[0]) {
+        this.touchStartY = e.touches[0].clientY;
+      }
     }
 
     // Start timing for long press
