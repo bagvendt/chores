@@ -206,7 +206,7 @@ class ChoreCard extends HTMLElement {
       </style>
       
       <div class="chore-card ${completedClass}">
-        <img class="chore-image" src="${this._chore.imageUrl}" alt="${this._chore.title}">
+        <img draggable="false" class="chore-image" src="${this._chore.imageUrl}" alt="${this._chore.title}">
         <div class="status-indicator">${statusEmoji}</div>
         <div class="progress-indicator"></div>
       </div>

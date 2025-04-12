@@ -128,7 +128,7 @@ class ShopItem extends HTMLElement {
       </style>
       
       <div class="shop-item ${disabledClass}">
-        <img class="shop-image" src="${this._item.imageUrl}" alt="${this._item.title}">
+        <img draggable="false" class="shop-image" src="${this._item.imageUrl}" alt="${this._item.title}">
         <h3 class="shop-title">${this._item.title}</h3>
         <div class="points-cost">${this._item.points} point</div>
         <button class="purchase-button" ${canPurchase ? '' : 'disabled'}>
