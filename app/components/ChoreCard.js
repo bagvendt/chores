@@ -1,6 +1,6 @@
 /**
  * ChoreCard web component
- * Displays a single chore with its details and allows toggling completion status
+ * Displays a single chore with just an image
  */
 class ChoreCard extends HTMLElement {
   constructor() {
@@ -54,8 +54,9 @@ class ChoreCard extends HTMLElement {
           border-radius: 10px;
           box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
           padding: 20px;
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
           cursor: pointer;
+          text-align: center;
         }
         
         .chore-card:hover {
@@ -64,84 +65,39 @@ class ChoreCard extends HTMLElement {
         }
         
         .chore-card.completed {
-          opacity: 0.7;
           background-color: rgba(76, 175, 80, 0.1);
         }
         
         .chore-image {
           width: 100%;
           height: auto;
-          margin-bottom: 10px;
+          max-height: 150px;
+          object-fit: contain;
           border-radius: 5px;
-        }
-        
-        .chore-title {
-          font-size: 1.2rem;
-          margin: 0 0 10px 0;
-        }
-        
-        .chore-details {
-          margin-bottom: 15px;
-          font-size: 0.9rem;
-        }
-        
-        .time {
-          display: flex;
-          align-items: center;
-          margin-bottom: 5px;
-        }
-        
-        .points {
-          font-weight: bold;
-          color: #4CAF50;
-        }
-        
-        .completion-status {
-          display: flex;
-          align-items: center;
-          margin-top: 10px;
-        }
-        
-        .completion-checkbox {
-          margin-right: 8px;
-          transform: scale(1.2);
         }
       </style>
       
       <div class="chore-card ${completedClass}">
         <img class="chore-image" src="${this._chore.imageUrl}" alt="${this._chore.title}">
-        <h3 class="chore-title">${this._chore.title}</h3>
-        
-        <div class="chore-details">
-          <div class="time">Tid: ${this._chore.estimatedTime} min</div>
-          <div class="points">Point: ${this._chore.points}</div>
-        </div>
-        
-        <div class="completion-status">
-          <input type="checkbox" class="completion-checkbox" ${this._chore.completed ? 'checked' : ''}>
-          <span>${this._chore.completed ? 'Fuldført' : 'Markér som fuldført'}</span>
-        </div>
       </div>
     `;
 
-    // Add event listener for the checkbox
-    this.shadowRoot.querySelector('.completion-checkbox').addEventListener('change', (e) => {
-      const completed = e.target.checked;
-      this._chore.completed = completed;
+    // Add click event listener to toggle completion
+    this.shadowRoot.querySelector('.chore-card').addEventListener('click', () => {
+      // Toggle completion state
+      this._chore.completed = !this._chore.completed;
       
       // Update the appearance
       const card = this.shadowRoot.querySelector('.chore-card');
-      if (completed) {
+      if (this._chore.completed) {
         card.classList.add('completed');
-        this.shadowRoot.querySelector('.completion-status span').textContent = 'Fuldført';
       } else {
         card.classList.remove('completed');
-        this.shadowRoot.querySelector('.completion-status span').textContent = 'Markér som fuldført';
       }
       
       // Dispatch an event to notify parent components
       this.dispatchEvent(new CustomEvent('completion-changed', {
-        detail: { choreId: this._chore.id, completed }
+        detail: { choreId: this._chore.id, completed: this._chore.completed }
       }));
     });
   }
