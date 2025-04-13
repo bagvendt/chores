@@ -107,9 +107,9 @@ class ChoreCard extends HTMLElement {
         }
         
         .chore-card {
-          background-color: #fff;
+          background-color: white;
           border-radius: 10px;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 4px 8px rgba(59, 47, 38, 0.1);
           transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
           cursor: pointer;
           position: relative;
@@ -122,21 +122,25 @@ class ChoreCard extends HTMLElement {
           -webkit-user-select: none;
           -webkit-touch-callout: none;
           touch-action: none;
+          border: 2px solid transparent;
         }
         
         .chore-card:hover {
           transform: translateY(-5px);
-          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+          box-shadow: 0 6px 12px rgba(59, 47, 38, 0.15);
+          border-color: #E8B84E;
         }
         
         .chore-card.completed {
-          background-color: rgba(76, 175, 80, 0.1);
+          background-color: rgba(163, 177, 128, 0.2);
+          border-color: #6A8E59;
         }
         
         .chore-card.pressing {
           transform: scale(0.95);
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 2px 4px rgba(59, 47, 38, 0.1);
           animation: crazyShake 0.5s infinite;
+          border-color: #C76F3B;
         }
         
         .chore-image {
@@ -159,7 +163,7 @@ class ChoreCard extends HTMLElement {
           font-size: 2rem;
           z-index: 10;
           text-shadow: 0 0 5px white, 0 0 5px white;
-          filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
+          filter: drop-shadow(0 0 2px rgba(59, 47, 38, 0.5));
         }
         
         .progress-indicator {
@@ -167,7 +171,7 @@ class ChoreCard extends HTMLElement {
           bottom: 0;
           left: 0;
           height: 8px;
-          background-color: #4CAF50;
+          background-color: #6A8E59;
           width: 0%;
           transition: width 0.1s linear;
           z-index: 10;
@@ -199,8 +203,8 @@ class ChoreCard extends HTMLElement {
         
         .progress-indicator.active {
           background: linear-gradient(90deg, 
-            #FF9900, #FF5722, #E91E63, #9C27B0, #3F51B5, #2196F3, #00BCD4, #009688, #4CAF50, #8BC34A);
-          background-size: 1000% 100%;
+            #E8B84E, #C76F3B, #F2B8C6, #6A8E59, #92B6E0, #A3B180, #A65B3A);
+          background-size: 700% 100%;
           animation: rainbowProgress 2s linear infinite;
         }
         
@@ -238,7 +242,7 @@ class ChoreCard extends HTMLElement {
           background-repeat: no-repeat;
           background-position: center;
           z-index: 100;
-          filter: drop-shadow(0 0 5px gold);
+          filter: drop-shadow(0 0 5px #E8B84E);
           opacity: 0;
           transform: scale(0);
         }
@@ -274,8 +278,8 @@ class ChoreCard extends HTMLElement {
           transform: translate(-50%, -50%);
           font-size: 3rem;
           font-weight: bold;
-          color: gold;
-          text-shadow: 0 0 10px rgba(0,0,0,0.7);
+          color: #E8B84E;
+          text-shadow: 0 0 10px rgba(59, 47, 38, 0.7);
           z-index: 101;
           opacity: 0;
           pointer-events: none;

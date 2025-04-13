@@ -142,7 +142,7 @@ export const routineTemplates = [
         title: 'Læs en bog',
         estimatedTime: 15,
         imageUrl: 'img/read-story-father.png',
-        points: 15,
+        points: 200,
       },
     ],
   },

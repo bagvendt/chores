@@ -63,27 +63,32 @@ class ShopItem extends HTMLElement {
           user-select: none;
           -webkit-user-select: none;
           -webkit-touch-callout: none;
+          touch-action: none;
         }
         
         .shop-item {
-          background-color: #fff;
+          background-color: white;
           border-radius: 10px;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 4px 8px rgba(59, 47, 38, 0.1);
           padding: 20px;
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s;
           user-select: none;
           -webkit-user-select: none;
           -webkit-touch-callout: none;
+          touch-action: none;
+          border: 2px solid transparent;
         }
         
         .shop-item:not(.disabled):hover {
           transform: translateY(-5px);
-          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+          box-shadow: 0 6px 12px rgba(59, 47, 38, 0.15);
+          border-color: #E8B84E;
         }
         
         .shop-item.disabled {
-          opacity: 0.5;
+          opacity: 0.7;
           cursor: not-allowed;
+          background-color: rgba(182, 182, 182, 0.1);
         }
         
         .shop-image {
@@ -91,21 +96,24 @@ class ShopItem extends HTMLElement {
           height: auto;
           margin-bottom: 10px;
           border-radius: 5px;
+          pointer-events: none;
+          -webkit-user-drag: none;
         }
         
         .shop-title {
           font-size: 1.2rem;
           margin: 0 0 10px 0;
+          color: #3B2F26;
         }
         
         .points-cost {
           font-weight: bold;
-          color: #4CAF50;
+          color: #C76F3B;
           margin-bottom: 15px;
         }
         
         .purchase-button {
-          background-color: #2196F3;
+          background-color: #6A8E59;
           color: white;
           border: none;
           padding: 10px 20px;
@@ -117,12 +125,12 @@ class ShopItem extends HTMLElement {
         }
         
         .purchase-button:not(:disabled):hover {
-          background-color: #0b7dda;
+          background-color: #A3B180;
         }
         
         .purchase-button:disabled {
-          background-color: #cccccc;
-          color: #666666;
+          background-color: #B6B6B6;
+          color: #3B2F26;
           cursor: not-allowed;
         }
       </style>
