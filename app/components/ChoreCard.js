@@ -91,6 +91,7 @@ class ChoreCard extends HTMLElement {
 
     const completedClass = this._chore.completed ? 'completed' : '';
     const statusEmoji = this._chore.completed ? '✅' : '❌';
+    const points = this._chore.points || 0;
 
     // Handle potentially null shadowRoot with a check
     if (!this.shadowRoot) return;
@@ -102,6 +103,7 @@ class ChoreCard extends HTMLElement {
           user-select: none;
           -webkit-user-select: none;
           -webkit-touch-callout: none;
+          touch-action: none;
         }
         
         .chore-card {
@@ -119,6 +121,7 @@ class ChoreCard extends HTMLElement {
           user-select: none;
           -webkit-user-select: none;
           -webkit-touch-callout: none;
+          touch-action: none;
         }
         
         .chore-card:hover {
@@ -145,6 +148,8 @@ class ChoreCard extends HTMLElement {
           left: 0;
           right: 0;
           bottom: 0;
+          pointer-events: none;
+          -webkit-user-drag: none;
         }
         
         .status-indicator {
@@ -203,21 +208,122 @@ class ChoreCard extends HTMLElement {
           0% { background-position: 0% 50%; }
           100% { background-position: 100% 50%; }
         }
+
+        /* Star Animation Styles */
+        .star-container {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          z-index: 100;
+          overflow: hidden;
+          opacity: 0;
+          visibility: hidden;
+          transition: opacity 0.3s;
+        }
+        
+        .star-container.active {
+          opacity: 1;
+          visibility: visible;
+        }
+        
+        .star {
+          position: absolute;
+          width: 40px;
+          height: 40px;
+          background-image: url('../../img/star-smaller.png');
+          background-size: contain;
+          background-repeat: no-repeat;
+          background-position: center;
+          z-index: 100;
+          filter: drop-shadow(0 0 5px gold);
+          opacity: 0;
+          transform: scale(0);
+        }
+        
+        @keyframes starBurst {
+          0% { 
+            opacity: 0;
+            transform: scale(0) rotate(0deg); 
+          }
+          20% { 
+            opacity: 1;
+            transform: scale(0.5) rotate(90deg); 
+          }
+          80% { 
+            opacity: 1;
+            transform: scale(1) rotate(180deg); 
+          }
+          100% { 
+            opacity: 0.2;
+            transform: scale(1.2) rotate(270deg); 
+          }
+        }
+        
+        @keyframes starFade {
+          0% { opacity: 1; }
+          100% { opacity: 0; }
+        }
+        
+        .points-indicator {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          font-size: 3rem;
+          font-weight: bold;
+          color: gold;
+          text-shadow: 0 0 10px rgba(0,0,0,0.7);
+          z-index: 101;
+          opacity: 0;
+          pointer-events: none;
+        }
+        
+        @keyframes pointsPopup {
+          0% { 
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.5);
+          }
+          50% { 
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.5);
+          }
+          80% { 
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.2);
+          }
+          100% { 
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(1);
+          }
+        }
       </style>
       
       <div class="chore-card ${completedClass}">
-        <img draggable="false" class="chore-image" src="${this._chore.imageUrl}" alt="${this._chore.title}">
+        <img class="chore-image" src="${this._chore.imageUrl}" alt="${this._chore.title}" draggable="false">
         <div class="status-indicator">${statusEmoji}</div>
         <div class="progress-indicator"></div>
+        <div class="star-container"></div>
+        <div class="points-indicator">+${points}</div>
       </div>
     `;
 
     const card = this.shadowRoot.querySelector('.chore-card');
 
-    // Add touch/mouse events for long press
     if (card) {
+      // Prevent scrolling on iOS
+      card.addEventListener(
+        'touchstart',
+        (e) => {
+          e.preventDefault();
+          this.startPress(e);
+        },
+        { passive: false }
+      );
+
       card.addEventListener('mousedown', this.startPress.bind(this));
-      card.addEventListener('touchstart', this.startPress.bind(this), { passive: true });
 
       card.addEventListener('mouseup', this.endPress.bind(this));
       card.addEventListener('mouseleave', this.cancelPress.bind(this));
@@ -230,12 +336,11 @@ class ChoreCard extends HTMLElement {
         return false;
       });
 
-      // Use a more type-safe approach to handle touch move events
+      // Handle touch move events
       card.addEventListener(
         'touchmove',
         (e) => {
-          // Cast the event to make TypeScript happy
-          if (e instanceof TouchEvent) {
+          if ('touches' in e) {
             this.checkTouchMove(e);
           }
         },
@@ -249,6 +354,11 @@ class ChoreCard extends HTMLElement {
    * @param {Event} e - The event object
    */
   startPress(e) {
+    // Prevent default for touch events to avoid scrolling on iOS
+    if (e.type === 'touchstart') {
+      e.preventDefault();
+    }
+
     if (this.animationActive) return;
 
     const shadowRoot = this.shadowRoot;
@@ -270,8 +380,7 @@ class ChoreCard extends HTMLElement {
 
     // Store touch position if it's a touch event
     if (e.type === 'touchstart' && 'touches' in e) {
-      // Use instanceof check instead of type assertion
-      if (e instanceof TouchEvent && e.touches[0]) {
+      if (e.touches[0]) {
         this.touchStartY = e.touches[0].clientY;
       }
     }
@@ -332,18 +441,85 @@ class ChoreCard extends HTMLElement {
 
   /**
    * Check if the touch has moved too far (for cancellation)
-   * @param {TouchEvent} e - The touch event
+   * @param {Event} e - The touch event
    */
   checkTouchMove(e) {
-    if (!this.pressStarted || !this.touchStartY || !e.touches || !e.touches[0]) return;
+    if (!this.pressStarted || this.touchStartY === null) return;
 
-    const touchY = e.touches[0].clientY;
-    const yDiff = Math.abs(touchY - this.touchStartY);
+    // Use type checking to safely access touch properties
+    if (e && 'touches' in e && e.touches && e.touches[0]) {
+      const touchY = e.touches[0].clientY;
+      const yDiff = Math.abs(touchY - this.touchStartY);
 
-    // Cancel if moved more than 20px
-    if (yDiff > 20) {
-      this.cancelPress();
+      // Cancel if moved more than 20px
+      if (yDiff > 20) {
+        this.cancelPress();
+      }
     }
+  }
+
+  /**
+   * Create and animate stars for the reward animation
+   * @param {number} numStars - The number of stars to create
+   */
+  createStarAnimation(numStars) {
+    const shadowRoot = this.shadowRoot;
+    if (!shadowRoot) return;
+
+    const starContainer = shadowRoot.querySelector('.star-container');
+    const pointsIndicator = shadowRoot.querySelector('.points-indicator');
+
+    if (!starContainer || !pointsIndicator) return;
+
+    // Clear any existing stars
+    starContainer.innerHTML = '';
+    starContainer.classList.add('active');
+
+    // Create stars
+    const maxStars = Math.min(numStars, 20); // Limit to 20 stars max for performance
+
+    for (let i = 0; i < maxStars; i++) {
+      const star = document.createElement('div');
+      star.classList.add('star');
+
+      // Random position
+      const randomX = Math.random() * 100;
+      const randomY = Math.random() * 100;
+      star.style.left = `${randomX}%`;
+      star.style.top = `${randomY}%`;
+
+      // Random size
+      const scale = 0.5 + Math.random() * 1.5;
+      star.style.width = `${40 * scale}px`;
+      star.style.height = `${40 * scale}px`;
+
+      // Random rotation
+      const initialRotation = Math.random() * 360;
+      star.style.transform = `rotate(${initialRotation}deg)`;
+
+      // Random delay
+      const delay = Math.random() * 0.5;
+      star.style.animation = `starBurst 0.6s ${delay}s forwards, starFade 0.5s ${delay + 1.5}s forwards`;
+
+      starContainer.appendChild(star);
+    }
+
+    // Animate points indicator
+    if (pointsIndicator instanceof HTMLElement) {
+      pointsIndicator.style.animation = 'pointsPopup 1.5s forwards';
+    }
+
+    // Reset animations after they complete
+    setTimeout(() => {
+      starContainer.classList.remove('active');
+      if (pointsIndicator instanceof HTMLElement) {
+        pointsIndicator.style.animation = '';
+      }
+
+      setTimeout(() => {
+        starContainer.innerHTML = '';
+      }, 300);
+    }, 2500);
   }
 
   /**
@@ -356,6 +532,9 @@ class ChoreCard extends HTMLElement {
 
     const shadowRoot = this.shadowRoot;
     if (!shadowRoot) return;
+
+    // Get previous completion state
+    const wasCompletedBefore = this._chore.completed;
 
     // Toggle completion state
     this._chore.completed = !this._chore.completed;
@@ -375,6 +554,14 @@ class ChoreCard extends HTMLElement {
 
       // Add completion animation
       card.classList.add('completed-animation');
+
+      // Start star animation if the chore was just completed
+      if (!wasCompletedBefore) {
+        // Get number of points from chore data
+        const points = this._chore.points || 0;
+        // Create one star for each point, minimum 5 stars
+        this.createStarAnimation(Math.max(5, points));
+      }
 
       // Add stronger vibration feedback for completion
       if (navigator.vibrate) {
