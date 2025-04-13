@@ -96,7 +96,7 @@ h1, h2, h3 {
 
 .chores-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: var(--spacing);
   margin: 1rem 0;
 }
@@ -191,7 +191,9 @@ routine-card {
   }
   
   .chores-container {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    max-width: 100%;
+    overflow: hidden;
   }
 }
 
@@ -199,7 +201,7 @@ routine-card {
   .routines-container,
   .routines-list,
   .chores-container {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   }
 }
 
