@@ -63,6 +63,14 @@ class ChoreCard extends HTMLElement {
    */
   set chore(chore) {
     this._chore = chore;
+
+    // Ensure the wasCompleted property is initialized
+    if (this._chore && this._chore.completed) {
+      this._chore.wasCompleted = true;
+    } else if (this._chore) {
+      this._chore.wasCompleted = this._chore.wasCompleted || false;
+    }
+
     this.render();
   }
 
@@ -90,7 +98,9 @@ class ChoreCard extends HTMLElement {
     if (!this._chore) return;
 
     const completedClass = this._chore.completed ? 'completed' : '';
-    const statusEmoji = this._chore.completed ? '✅' : '❌';
+    // Only show status emoji for completed (✅) or previously completed (❌) states
+    // For initial state (never completed), don't show any indicator
+    const statusEmoji = this._chore.completed ? '✅' : this._chore.wasCompleted ? '❌' : '';
     const points = this._chore.points || 0;
 
     // Handle potentially null shadowRoot with a check
@@ -450,8 +460,15 @@ class ChoreCard extends HTMLElement {
   checkTouchMove(e) {
     if (!this.pressStarted || this.touchStartY === null) return;
 
-    // Use type checking to safely access touch properties
-    if (e && 'touches' in e && e.touches && e.touches[0]) {
+    // Standard JavaScript check for touch properties
+    if (
+      e &&
+      typeof e === 'object' &&
+      'touches' in e &&
+      e.touches &&
+      e.touches[0] &&
+      typeof e.touches[0].clientY === 'number'
+    ) {
       const touchY = e.touches[0].clientY;
       const yDiff = Math.abs(touchY - this.touchStartY);
 
@@ -543,6 +560,11 @@ class ChoreCard extends HTMLElement {
     // Toggle completion state
     this._chore.completed = !this._chore.completed;
 
+    // Track if chore was ever completed to show the X later
+    if (wasCompletedBefore) {
+      this._chore.wasCompleted = true;
+    }
+
     // Update the appearance
     const card = shadowRoot.querySelector('.chore-card');
     const statusIndicator = shadowRoot.querySelector('.status-indicator');
@@ -573,7 +595,8 @@ class ChoreCard extends HTMLElement {
       }
     } else {
       card.classList.remove('completed');
-      statusIndicator.textContent = '❌';
+      // Show X only if it was previously completed
+      statusIndicator.textContent = this._chore.wasCompleted ? '❌' : '';
 
       // Add vibration feedback for un-completion
       if (navigator.vibrate) {
